@@ -40,3 +40,4 @@ plt.xlabel('Previsão')
 plt.ylabel('Verdadeiro')
 plt.title('Matriz de Confusão - Naive Bayes')
 plt.show()
+
