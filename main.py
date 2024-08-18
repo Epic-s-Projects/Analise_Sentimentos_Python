@@ -1,21 +1,31 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Carregar o dataset do link externo
+url = 'https://raw.githubusercontent.com/justmarkham/DAT8/master/data/yelp.csv'
+data = pd.read_csv(url)
+
+# Verificar as primeiras linhas do dataset para ajustar os nomes das colunas
+print(data.head())
+
 # Supondo que o dataset tenha colunas 'text' para a avaliação e 'label' para a classificação
-data = pd.read_csv('product_reviews.csv')
-data = data[['text', 'label']]  # Ajuste os nomes das colunas conforme necessário
+# Ajustar os nomes das colunas conforme necessário, por exemplo, 'text' e 'stars'
+data = data[['text', 'stars']]  # Ajuste os nomes das colunas conforme necessário
+
+# Mapear estrelas para categorias binárias: 1 (negativo) e 2 (positivo)
+data['label'] = data['stars'].apply(lambda x: 1 if x < 3 else 2)
 
 # Dividir os dados em treino e teste
 train_texts, test_texts, train_labels, test_labels = train_test_split(
     data['text'], data['label'], test_size=0.2, random_state=42)
 
-# Transformar os textos em vetores de contagem ou TF-IDF
+# Transformar os textos em vetores de TF-IDF
 vectorizer = TfidfVectorizer(stop_words='english', max_features=5000)
 train_vectors = vectorizer.fit_transform(train_texts)
 test_vectors = vectorizer.transform(test_texts)
@@ -41,3 +51,24 @@ plt.ylabel('Verdadeiro')
 plt.title('Matriz de Confusão - Naive Bayes')
 plt.show()
 
+# Importância das palavras no modelo Naive Bayes
+feature_names = vectorizer.get_feature_names_out()
+class_labels = nb_model.classes_
+
+# As probabilidades logarítmicas para cada classe
+log_prob = nb_model.feature_log_prob_
+
+# Para visualização, você pode selecionar uma classe específica ou fazer a média entre elas.
+# Por exemplo, aqui mostramos as palavras mais relevantes para a primeira classe:
+sorted_features = np.argsort(log_prob[0])
+
+top_n = 20  # Número de palavras mais importantes a exibir
+
+plt.figure(figsize=(10, 6))
+plt.barh(range(top_n), log_prob[0][sorted_features[-top_n:]], align='center', color='purple')
+plt.yticks(range(top_n), [feature_names[i] for i in sorted_features[-top_n:]])
+plt.xlabel('Log Probabilidade')
+plt.ylabel('Palavra')
+plt.title('Palavras Mais Importantes - Naive Bayes')
+plt.gca().invert_yaxis()
+plt.show()
