@@ -6,6 +6,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
+from deep_translator import GoogleTranslator  # Importar o tradutor
 
 # Carregar o dataset do link externo
 url = 'https://raw.githubusercontent.com/justmarkham/DAT8/master/data/yelp.csv'
@@ -15,7 +16,6 @@ data = pd.read_csv(url)
 print(data.head())
 
 # Supondo que o dataset tenha colunas 'text' para a avaliação e 'label' para a classificação
-# Ajustar os nomes das colunas conforme necessário, por exemplo, 'text' e 'stars'
 data = data[['text', 'stars']]  # Ajuste os nomes das colunas conforme necessário
 
 # Mapear estrelas para categorias binárias: 1 (negativo) e 2 (positivo)
@@ -58,17 +58,24 @@ class_labels = nb_model.classes_
 # As probabilidades logarítmicas para cada classe
 log_prob = nb_model.feature_log_prob_
 
-# Para visualização, você pode selecionar uma classe específica ou fazer a média entre elas.
-# Por exemplo, aqui mostramos as palavras mais relevantes para a primeira classe:
+# Ordenar as palavras de acordo com sua importância
 sorted_features = np.argsort(log_prob[0])
 
 top_n = 20  # Número de palavras mais importantes a exibir
 
+# Obter as palavras mais importantes
+top_words = [feature_names[i] for i in sorted_features[-top_n:]]  # Certifique-se de que esta linha exista e funcione
+
+# Traduzir as palavras para o português usando deep-translator
+translator = GoogleTranslator(source='en', target='pt')
+translated_words = [translator.translate(word) for word in top_words]
+
+# Plotar o gráfico com as palavras traduzidas
 plt.figure(figsize=(10, 6))
 plt.barh(range(top_n), log_prob[0][sorted_features[-top_n:]], align='center', color='purple')
-plt.yticks(range(top_n), [feature_names[i] for i in sorted_features[-top_n:]])
+plt.yticks(range(top_n), translated_words)
 plt.xlabel('Log Probabilidade')
-plt.ylabel('Palavra')
-plt.title('Palavras Mais Importantes - Naive Bayes')
+plt.ylabel('Palavra (Traduzida)')
+plt.title('Palavras Mais Importantes - Naive Bayes (Traduzidas)')
 plt.gca().invert_yaxis()
 plt.show()
