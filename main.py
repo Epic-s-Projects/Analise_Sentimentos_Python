@@ -51,6 +51,16 @@ plt.ylabel('Verdadeiro')
 plt.title('Matriz de Confusão - Naive Bayes')
 plt.show()
 
+plt.figure(figsize=(6, 4))
+sns.countplot(x='label', data=data, palette='viridis')
+plt.xlabel('Classe')
+plt.ylabel('Contagem')
+plt.title('Distribuição das Classes')
+plt.xticks([0, 1], ['Negativo', 'Positivo'])
+plt.show()
+
+
+
 # Importância das palavras no modelo Naive Bayes
 feature_names = vectorizer.get_feature_names_out()
 class_labels = nb_model.classes_
